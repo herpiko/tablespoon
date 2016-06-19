@@ -9,9 +9,11 @@ var helpers = {
 	handleErr: function(err, msg, qt){
 		var pos,
 				err_text = 'Error in '.red + msg.red;
-		if (err){ 
+		if (err){
+      console.log(err);
 			console.error(err_text)	
-			throw err
+      // No crash please
+			// throw err
 		}
 	}
 }
@@ -21,15 +23,20 @@ function connectToDb(conString){
 	return this
 }
 
-function createAndInsert(table_commands){
-	createTable(table_commands.create)
-	insertInto(table_commands.insert)
+function createAndInsert(table_commands, cb){
+	createTable(table_commands.create, function(err){
+	  insertInto(table_commands.insert)
+    cb(err);
+  })
 }
 
-function createTable(create_commands){
+function createTable(create_commands, cb){
 	db_instance = db.serialize(function(){
 	console.log(create_commands)
-		db.run(create_commands)
+		db.run(create_commands, function(err, result){
+      if (err) return cb(err);
+      cb();
+    })
 	})
 }
 

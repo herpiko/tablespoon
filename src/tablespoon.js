@@ -179,23 +179,25 @@ function createTableCommands(table_data, tableName, table_schema, permanent, ski
 	return table_commands;
 }
 
-function createAndInsert(table_commands){
+function createAndInsert(table_commands, cb){
 	if (!connected) connectToDb();
 	if (flavor == 'sqlite'){
-		sqlite.createAndInsert(table_commands)
+		sqlite.createAndInsert(table_commands, cb)
 	} else if (flavor == 'pgsql'){
 		pgsql.createAndInsert(table_commands);
 	}
 }
 
-function createTable(table_data, tableName, table_schema, permanent){
+function createTable(table_data, tableName, table_schema, permanent, cb){
 	if (!tableName) { 
 		throw 'You must specify a tablename.';
 	}
 	var table_commands = createTableCommands(table_data, tableName, table_schema, permanent);
 	reportMsg(table_commands)
 	if (flavor == 'sqlite'){
-		sqlite.createTable(table_commands.create)
+		sqlite.createTable(table_commands.create, function(err) {
+      cb(err)
+    })
 	} else if (flavor == 'pgsql'){
 		pgsql.createTable(table_commands.create)
 	}
@@ -211,10 +213,10 @@ function insertInto(table_data, tableName){
 	}
 }
 
-function makeTableFromData(table_data, tableName, table_schema, permanent){
+function makeTableFromData(table_data, tableName, table_schema, permanent, cb){
 	var table_commands = createTableCommands(table_data, tableName, table_schema, permanent);
 	reportMsg(table_commands)
-	createAndInsert(table_commands);
+	createAndInsert(table_commands, cb);
 }
 
 function makeTableFromDataStreaming(tableName, tableSchema, permanent){
